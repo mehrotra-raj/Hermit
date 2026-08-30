@@ -1,0 +1,19 @@
+{
+  "name": "hermit",
+  "version": "1.0.0",
+  "description": "Ticket Booking System",
+  "license": "ISC",
+  "author": "Raj",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.0"
+  }
+}

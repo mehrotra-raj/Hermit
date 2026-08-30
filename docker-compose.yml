@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: hermit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hermit
+      POSTGRES_PASSWORD: hermitpass
+      POSTGRES_DB: hermit
+    ports:
+      - "5432:5432"
+    volumes:
+      - hermit_pgdata:/var/lib/postgresql/data
+
+volumes:
+  hermit_pgdata:
