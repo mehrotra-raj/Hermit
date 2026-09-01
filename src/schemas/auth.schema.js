@@ -5,3 +5,8 @@ export const signupSchema = z.object({
     email: z.email("Please enter a valid email"),
     password: z.string("Password must contain at least 8 characters").min(8)
 })
+
+export const loginSchema = z.object({
+    email: z.email("Please enter a valid email"),
+    password: z.string("Password must contain at least 8 characters").min(8)
+})

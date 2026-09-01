@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
-import { signupSchema } from "../schemas/auth.schema.js";
+import { signupSchema, loginSchema} from "../schemas/auth.schema.js";
 import pool from "../db/conn.js";
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
     const result = signupSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -45,5 +45,66 @@ const signup = async (req, res) => {
         token,
     })
 }
+export const login = async (req, res) => {
+    const result = loginSchema.safeParse(req.body)
 
-export default signup;
+    if(!result) {
+        return res.status(401).json({
+            message: "Invalid credentials",
+        })
+    }
+
+    const {email, password} = result.data;
+    
+
+    /*
+    Since we have id as primary key and email as unique, these both are 
+    indexed and thus fetching them is faster,
+    we are not indexing anything else for now.
+     */
+    const dbResult = await pool.query(
+        `SELECT id, password_hash
+        FROM users
+        WHERE email = $1`,
+        [email]
+    )
+    
+    console.log("email:", email);
+    console.log("password:", password);
+    console.log("DB:", dbResult.rows);
+    //Return Invalid credentials if email does not exist
+    // console.log(dbResult)
+    if(dbResult.rows.length === 0) {
+        return res.status(401).json({
+            message: "Invalid Credentials",
+        })
+    }
+
+
+    const {id, password_hash} = dbResult.rows[0]
+
+    //Compare the passwords
+    const PasswordMatches = await bcrypt.compare(password, password_hash)
+
+    if (!PasswordMatches) {
+        return res.status(401).json({
+            message: "Invalid credentials"
+        })
+    }
+    const payload = {
+        sub : id,
+    }
+
+    const token = jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "2d"
+        }
+    )
+
+    res.status(200).json({
+        message: "Successfully Logged In",
+        token,
+    })
+}
