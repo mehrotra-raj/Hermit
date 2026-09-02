@@ -1,21 +1,24 @@
 import "dotenv/config"
 import express from "express"
 import authRoute from "./routes/auth.route.js"
+import organizerRoute from "./routes/organizer.route.js"
 import { authMiddleware } from "./middlewares/auth.middleware.js";
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended : true}));
-app.use("/auth", authRoute);
+app.use(express.urlencoded());
 
+//Routing Middlewares
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/organizer", organizerRoute)
 
 app.get("/", (req, res) => {
     res.send("Hermit is working...")
 });
 
-app.get("/profile", authMiddleware, (req, res) => {
-    res.send("View your profile")
-})
+
+
+
 
 const PORT = process.env.PORT || 3000;
 

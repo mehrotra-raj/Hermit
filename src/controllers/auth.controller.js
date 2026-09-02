@@ -68,12 +68,8 @@ export const login = async (req, res) => {
         WHERE email = $1`,
         [email]
     )
-    
-    console.log("email:", email);
-    console.log("password:", password);
-    console.log("DB:", dbResult.rows);
+
     //Return Invalid credentials if email does not exist
-    // console.log(dbResult)
     if(dbResult.rows.length === 0) {
         return res.status(401).json({
             message: "Invalid Credentials",
