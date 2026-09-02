@@ -2,7 +2,7 @@ import pool  from "../db/conn.js"
 export const createOrganizer = async (req, res) => {
 
     const user_id = req.user?.sub; //although authMiddleware checks req.user exists, we still check "req.user?"
-
+    
     try {
         await pool.query(
             `INSERT INTO organizers(user_id)

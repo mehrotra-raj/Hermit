@@ -23,3 +23,17 @@ CREATE TABLE venues (
     total_capacity INT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE shows (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    organizer_id INT NOT NULL REFERENCES organizers(id) on DELETE CASCADE,
+    venue_id INT NOT NULL REFERENCES venues(id),
+    title VARCHAR (50) NOT NULL,
+    description TEXT,
+    starts_at TIMESTAMPTZ NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Coming soon...'
+        CHECK(status IN('       ', 'Published', 'Cancelled', 'Completed')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+);
