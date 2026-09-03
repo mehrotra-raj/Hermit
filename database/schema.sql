@@ -24,16 +24,41 @@ CREATE TABLE venues (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE events(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    organizer_id INT NOT NULL REFERENCES organizers(id) ON DELETE CASCADE,
+    title VARCHAR(100),
+    description VARCHAR(1000),
+    category VARCHAR(50) NOT NULL DEFAULT 'general'
+        CHECK (category IN('movie', 'concert', 'standup', 'sports', 'theatre', 'general'))
+    duration_minutes INT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+)
+
+
 CREATE TABLE shows (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     organizer_id INT NOT NULL REFERENCES organizers(id) on DELETE CASCADE,
     venue_id INT NOT NULL REFERENCES venues(id),
-    title VARCHAR (50) NOT NULL,
-    description TEXT,
+    -- title VARCHAR (50) NOT NULL,
+    -- description TEXT, 
+    --earlier there was no "Events" table but due to data redundancy and inconsistency, we added an Events table
+    --So, description and text is now a part of Event
     starts_at TIMESTAMPTZ NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'Coming soon...'
         CHECK(status IN('       ', 'Published', 'Cancelled', 'Completed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-
 );
+
+CREATE TABLE seats(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    show_id INT NOT NULL REFERENCES shows(id);
+
+)
+
+
+
+
+
