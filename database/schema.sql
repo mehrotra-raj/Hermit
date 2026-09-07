@@ -45,7 +45,8 @@ CREATE TABLE shows (
     -- description TEXT, 
     --earlier there was no "Events" table but due to data redundancy and inconsistency, we added an Events table
     --So, description and text is now a part of Event
-    starts_at TIMESTAMPTZ NOT NULL,
+    starts_at TIMESTAMPTZ NOT NULL, 
+    --must have both date and time or else the separation of show and events wont matter
     status VARCHAR(20) NOT NULL DEFAULT 'Coming soon...'
         CHECK(status IN('Coming soon...', 'Published', 'Cancelled', 'Completed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -72,4 +73,21 @@ CREATE TABLE show_seats (
         CHECK (status IN ('available', 'booked')),
 
     UNIQUE(show_id, seat_id)
+);
+
+
+CREATE TABLE bookings(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    show_id INT NOT NULL REFERENCES shows(id),
+    total_amount INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+CREATE TABLE booking_seats(
+    booking_id INT NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+    show_seat_id INT NOT NULL REFERENCES show_seats(id),
+    seat_price INT NOT NULL,
+    PRIMARY KEY(booking_id, show_seat_id)
 );
