@@ -20,7 +20,6 @@ CREATE TABLE venues (
     address TEXT NOT NULL,
     city VARCHAR(100) NOT NULL,
     state VARCHAR(100) NOT NULL,
-    total_capacity INT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -36,10 +35,14 @@ CREATE TABLE events(
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 ); --this could be a movie "Sholay" or a standup show "Jealous of Sabziwala" 
 
+CREATE TABLE auditoriums(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    venue_id INT NOT NULL REFERENCES venues(id)
+);
 
 CREATE TABLE shows (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    venue_id INT NOT NULL REFERENCES venues(id),
+    auditorium_id INT NOT NULL REFERENCES auditoriums(id),
     event_id INT NOT NULL REFERENCES events(id),
     -- title VARCHAR (50) NOT NULL,
     -- description TEXT, 
@@ -55,22 +58,24 @@ CREATE TABLE shows (
 
 CREATE TABLE seats(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    venue_id INT NOT NULL REFERENCES venues(id),
+    auditorium_id INT NOT NULL REFERENCES auditoriums(id),
+    -- venue_id INT NOT NULL REFERENCES venues(id), 
+    --keeping a venue here isnt good, it refernces audi so we can use join to fetch!
     section VARCHAR(50) DEFAULT 'Standard'
         CHECK(section IN('Standard', 'Premium', 'Balcony')),
     row_label VARCHAR(10),             -- "A", "B", "C"... NULL for General Admission
     seat_number INT,                   -- 1, 2, 3... NULL for General Admission
-    UNIQUE(venue_id, section, row_label, seat_number)
+    UNIQUE(auditorium_id, section, row_label, seat_number)
 );
 
 
 CREATE TABLE show_seats (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     show_id INT NOT NULL REFERENCES shows(id) ON DELETE CASCADE,
-    seat_id INT REFERENCES seats(id),   
-
+    seat_id INT NOT NULL REFERENCES seats(id),   
+    --doesnt need auditorium, violates 3NF can refer through seat
     status VARCHAR(20) NOT NULL DEFAULT 'available'
-        CHECK (status IN ('available', 'booked')),
+        CHECK (status IN ('available', 'booked', 'held')),
 
     UNIQUE(show_id, seat_id)
 );
@@ -91,3 +96,5 @@ CREATE TABLE booking_seats(
     seat_price INT NOT NULL,
     PRIMARY KEY(booking_id, show_seat_id)
 );
+
+
