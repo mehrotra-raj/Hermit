@@ -72,3 +72,52 @@ export const fetchVenuesWithShows = async (req, res) => {
         venues,
     })
 }
+
+export const createEvent = async (req, res) => {
+
+
+    const {title, description, category, duration_minutes} = req.body;
+
+    const user_id = req.user.sub; //from the bearer token
+
+
+
+    //find in the organizers table if there exists an organizer with this id
+
+    const dbResult = await pool.query(
+        `
+        SELECT id 
+        FROM organizers
+        WHERE user_id = $1;
+        `,
+        [user_id]
+    ) 
+    const organizer_id = dbResult.rows[0].id;
+    console.log(organizer_id)
+
+    if (dbResult.rows.length == 0) {
+        return res.status(403).json({
+            message: "Create an organizer account first",
+        })
+    }
+
+
+    try {
+        await pool.query(
+            `
+            INSERT INTO events (organizer_id, title, description, category, duration_minutes)
+            VALUES($1, $2, $3, $4, $5)
+            `,
+            [organizer_id, title, description, category, duration_minutes]
+
+        )
+    } catch (err) {
+        console.log(err);
+        return res.status(409).json({
+            message : "Some db Error",
+        })
+    }
+    return res.status(201).json({
+        message : "created",
+    })
+}

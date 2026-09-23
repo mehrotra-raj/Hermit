@@ -3,7 +3,7 @@ import pool from "../db/conn.js"
 export const createShow = async (req, res) => {
     //show creation logic   
 
-    const {venue_id, title, description, starts_at, status} = req.body;
+    const {auditorium_id, event_id, starts_at} = req.body;
 
 
     const user_id = req.user.sub;
@@ -23,15 +23,26 @@ export const createShow = async (req, res) => {
         })
     }
 
+
     const organizer_id = dbResult.rows[0].id;
+
+   //check whether this event is hosted by thi 
+    const eventCheck = await pool.query(
+    `SELECT id FROM events WHERE id = $1 AND organizer_id = $2`,
+    [event_id, organizer_id]
+);
+
+if (eventCheck.rows.length === 0) {
+    return res.status(403).json({ message: "Not your event" });
+}
 
     try {
         await pool.query(
             `
-            INSERT INTO shows (organizer_id, venue_id, title, description, starts_at, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO shows (auditorium_id, event_id, starts_at, status)
+            VALUES ($1, $2, $3, $4)
             `,
-            [organizer_id, venue_id, title, description, starts_at, status]
+            [auditorium_id, event_id, starts_at, 'Coming soon...']
         )
     } catch (err) {
         return res.status(403).json({
