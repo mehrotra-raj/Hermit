@@ -4,6 +4,8 @@ export const addVenue  = async (req, res) => {
     //Venue adding logic
     const user_id = req.user.sub;
 
+    const {name, address, city, state} = req.body;
+
     const dbResult = await pool.query(
         `
         SELECT id
@@ -22,11 +24,10 @@ export const addVenue  = async (req, res) => {
     try {
         await pool.query(
             `
-            INSERT INTO venues(name, address, city, state, total_capacity)
-            VALUES($1, $2, $3, $4, $5)
+            INSERT INTO venues(name, address, city, state)
+            VALUES($1, $2, $3, $4)
             `,
-            ["Habitat", "Borivali", "Pune", "Maharashtra", 100]
-            
+            [name, address, city, state]
         )
     } catch (err) {
         return res.status(409).json({

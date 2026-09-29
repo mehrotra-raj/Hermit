@@ -27,16 +27,17 @@ export const fetchVenuesWithShows = async (req, res) => {
 
     const dbResult = await pool.query(
         `
-        SELECT 
-        v.id AS venue_id,
+        SELECT
+        v.id   AS venue_id,
         v.name AS venue_name,
-        s.id as show_id,
+        a.id   AS auditorium_id,
+        s.id   AS show_id,
         s.starts_at
         FROM shows s
-        JOIN venues v
-            ON s.venue_id = v.id
+        JOIN auditoriums a ON s.auditorium_id = a.id
+        JOIN venues v      ON a.venue_id     = v.id
         WHERE s.event_id = $1
-        AND s.status IN('Coming soon...', 'Published')
+        AND s.status IN ('Coming soon...', 'Published')
         ORDER BY v.id, s.starts_at
         `,[event_id]
     )
@@ -92,8 +93,8 @@ export const createEvent = async (req, res) => {
         `,
         [user_id]
     ) 
-    const organizer_id = dbResult.rows[0].id;
-    console.log(organizer_id)
+    
+  
 
     if (dbResult.rows.length == 0) {
         return res.status(403).json({
@@ -101,7 +102,7 @@ export const createEvent = async (req, res) => {
         })
     }
 
-
+    const organizer_id = dbResult.rows[0].id;
     try {
         await pool.query(
             `

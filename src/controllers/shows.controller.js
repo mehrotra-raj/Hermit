@@ -32,28 +32,57 @@ export const createShow = async (req, res) => {
     [event_id, organizer_id]
 );
 
-if (eventCheck.rows.length === 0) {
-    return res.status(403).json({ message: "Not your event" });
-}
+    if (eventCheck.rows.length === 0) {
+        return res.status(403).json({ message: "Not your event" });
+    }
+
+    const client = await pool.connect();
 
     try {
-        await pool.query(
+        await client.query('BEGIN');
+        const showResult = await client.query(
             `
             INSERT INTO shows (auditorium_id, event_id, starts_at, status)
             VALUES ($1, $2, $3, $4)
+            RETURNING id
             `,
             [auditorium_id, event_id, starts_at, 'Coming soon...']
+        );
+
+        const showId = showResult.rows[0].id;
+
+        const seatsResult = await client.query(
+            `
+            INSERT INTO show_seats(show_id, seat_id, status)
+            SELECT $1, id, 'available'
+            FROM seats
+            WHERE auditorium_id = $2
+            `,
+            [showId, auditorium_id]
         )
+
+        if (seatsResult.rowCount === 0) {         
+            await client.query('ROLLBACK');       
+            return res.status(400).json({ message: "This auditorium has no seats" });
+        }
+
+        await client.query('COMMIT');
+
+
+        return res.status(201).json({
+            show_id: showId,
+            seats_created: seatsResult.rowCount,
+            message: "Show created",
+        })
+
+
     } catch (err) {
-        return res.status(403).json({
+        await client.query('ROLLBACK');
+        return res.status(500).json({
             err,
             message: "Some db Error",
         })
+    } finally {
+        client.release();
     }
-
-
-    return res.status(201).json({
-        user_id,
-        message: "Show created",
-    })
 }
