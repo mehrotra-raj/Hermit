@@ -47,7 +47,7 @@ CREATE TABLE shows (
     -- title VARCHAR (50) NOT NULL,
     -- description TEXT, 
     --earlier there was no "Events" table but due to data redundancy and inconsistency, we added an Events table
-    --So, description and text is now a part of Event
+    --So, description  and text is now a part of Event
     starts_at TIMESTAMPTZ NOT NULL, 
     --must have both date and time or else the separation of show and events wont matter
     status VARCHAR(20) NOT NULL DEFAULT 'Coming soon...'

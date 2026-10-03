@@ -86,3 +86,34 @@ export const createShow = async (req, res) => {
         client.release();
     }
 }
+
+export const seatMap = async (req, res) => {
+    const {id} = req.params;
+
+   try {
+     const result = await pool.query(
+        `
+        SELECT 
+        ss.id,
+        ss.sta
+        s.row_label,
+        s.seat_number,
+        s.section
+        FROM show_seats as ss
+        JOIN seats as s 
+        ON ss.seat_id = s.id
+        WHERE show_id = $1
+        `,[id]
+    )
+    const seats = result.rows;
+    return res.status(200).json( {
+        message: "OK",
+        seats,
+    })
+   } catch(err) {
+        console.log(err);
+        return res.status(409).json({
+            message: "Some DB error",
+        })
+   }
+}
