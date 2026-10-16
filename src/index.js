@@ -5,6 +5,8 @@ import organizerRoute from "./routes/organizer.route.js"
 import showsRoute from "./routes/shows.route.js"
 import venueRoute from "./routes/venue.route.js"
 import eventsRoute from "./routes/events.route.js"
+import bokingRoute from "./routes/booking.route.js"
+import { book } from "./controllers/booking.controller.js"
 
 const app = express();
 app.use(express.json());
@@ -13,9 +15,10 @@ app.use(express.urlencoded());
 //Routing Middlewares
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/organizer", organizerRoute)
-app.use("/api/v1/shows", showsRoute);
+app.use("/api/v1/show", showsRoute);
 app.use("/api/v1/venue", venueRoute);
-app.use("/api/v1/events", eventsRoute);
+app.use("/api/v1/event", eventsRoute);
+app.use("/api/v1/booking", bokingRoute)
 
 app.get("/", (req, res) => {
     res.send("Hermit is working...")
